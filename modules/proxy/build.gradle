@@ -1,0 +1,22 @@
+ext {
+  artifactId = 'selenide-proxy'
+}
+
+dependencies {
+  api project(":statics")
+  api("com.github.valfirst.browserup-proxy:browserup-proxy-core:${browserupProxyVersion}") {
+    exclude group: 'io.netty'
+    exclude group: 'org.seleniumhq.selenium'
+  }
+  implementation("xyz.rogfam:littleproxy:${littleProxyVersion}")
+  implementation("io.netty:netty-all:$nettyVersion") {because 'used by browserup-proxy'}
+
+  testImplementation project(':statics')
+  testImplementation project(':statics').sourceSets.test.output
+  testImplementation project(':modules:core').sourceSets.test.output
+  testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
+  testImplementation("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
+  testImplementation("org.assertj:assertj-core:$assertjVersion") {transitive false}
+}
+
+apply from: rootProject.file('gradle/publish-module.gradle')

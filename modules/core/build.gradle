@@ -1,0 +1,41 @@
+ext {
+  artifactId = 'selenide-core'
+}
+
+sourceSets {
+  main {
+    java {srcDir rootProject.file('src/main/java')}
+    resources {srcDirs rootProject.file('src/main/resources')}
+  }
+  test {
+    java {srcDir rootProject.file('src/test/java')}
+    resources {srcDir rootProject.file('src/test/resources')}
+  }
+}
+
+dependencies {
+  api('org.opentest4j:opentest4j:1.2.0')
+
+  api('io.github.bonigarcia:webdrivermanager:5.3.2') {
+    exclude group: 'org.apache.httpcomponents.core5'
+    exclude group: 'org.apache.httpcomponents.client5'
+    exclude group: 'com.github.docker-java'
+    exclude group: 'org.rauschig'
+    exclude group: 'commons-lang'
+    exclude group: 'org.slf4j'
+  }
+  implementation('org.apache.commons:commons-compress:1.22') {because 'used by webdrivermanager'}
+  implementation('org.apache.httpcomponents.client5:httpclient5:5.2.1')
+
+  compileOnly("com.github.valfirst.browserup-proxy:browserup-proxy-core:$browserupProxyVersion")
+  compileOnly("xyz.rogfam:littleproxy:$littleProxyVersion")
+
+  compileOnly("org.junit.jupiter:junit-jupiter-api:$junitVersion")
+  testImplementation("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
+  testImplementation("org.junit.jupiter:junit-jupiter-params:$junitVersion")
+
+  testImplementation("org.mockito:mockito-core:$mockitoVersion")
+  testImplementation("org.assertj:assertj-core:$assertjVersion") {transitive false}
+}
+
+apply from: rootProject.file('gradle/publish-module.gradle')

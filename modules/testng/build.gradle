@@ -1,0 +1,25 @@
+ext {
+  artifactId = 'selenide-testng'
+  testngVersion = '7.4.0'
+}
+
+dependencies {
+  api project(':statics')
+  testImplementation project(':statics').sourceSets.test.output
+  testImplementation project(':modules:core').sourceSets.test.output
+
+  api("org.testng:testng:$testngVersion") { transitive = false }
+  testRuntimeOnly("org.testng:testng:$testngVersion") {
+    exclude(group: 'junit')
+    exclude(group: 'testng')
+    exclude(group: 'org.apache.ant')
+    exclude(group: 'com.google.inject')
+  }
+  testImplementation("org.mockito:mockito-core:$mockitoVersion")
+}
+
+tasks.withType(Test).configureEach{
+  useTestNG()
+}
+
+apply from: rootProject.file('gradle/publish-module.gradle')

@@ -1,0 +1,112 @@
+subprojects {
+  tasks.withType(Test).configureEach {
+    include 'com/codeborne/selenide/**/*'
+  }
+
+  tasks.register("ie", Test) {
+    systemProperties['selenide.browser'] = 'ie'
+    systemProperties['selenide.timeout'] = '8000'
+    include 'integration/**/*'
+    exclude '**/AlertText.*'
+    exclude '**/ConfirmTest.*'
+    exclude 'com/codeborne/selenide/**/*'
+    outputs.upToDateWhen {false}
+  }
+
+  tasks.register("edge", Test) {
+    systemProperties['selenide.browser'] = 'edge'
+    include 'integration/**/*'
+    exclude 'com/codeborne/selenide/**/*'
+    outputs.upToDateWhen {false}
+  }
+
+  tasks.register("edge_headless", Test) {
+    systemProperties['selenide.browser'] = 'edge'
+    systemProperties['selenide.headless'] = 'true'
+    include 'integration/**/*'
+    exclude 'com/codeborne/selenide/**/*'
+    outputs.upToDateWhen {false}
+  }
+
+  tasks.register("chrome", Test) {
+    systemProperties['selenide.browser'] = 'chrome'
+    include 'integration/**/*'
+    exclude 'com/codeborne/selenide/**/*'
+    outputs.upToDateWhen {false}
+  }
+
+  tasks.register("chrome_headless", Test) {
+    systemProperties['selenide.browser'] = 'chrome'
+    systemProperties['selenide.headless'] = 'true'
+    include 'integration/**/*'
+    exclude 'com/codeborne/selenide/**/*'
+    outputs.upToDateWhen {false}
+  }
+
+  tasks.register("chrome_remote", Test) {
+    systemProperties['selenide.remote'] = 'http://localhost:4444/wd/hub'
+    systemProperties['selenide.browser'] = 'chrome'
+    include 'integration/**/*'
+    exclude 'com/codeborne/selenide/**/*'
+    outputs.upToDateWhen {false}
+  }
+
+  tasks.register("firefox", Test) {
+    systemProperties['selenide.browser'] = 'firefox'
+    include 'integration/**/*'
+    exclude 'com/codeborne/selenide/**/*'
+    outputs.upToDateWhen {false}
+  }
+
+  tasks.register("firefox_headless", Test) {
+    systemProperties['selenide.browser'] = 'firefox'
+    systemProperties['selenide.headless'] = 'true'
+    include 'integration/**/*'
+    exclude 'com/codeborne/selenide/**/*'
+    outputs.upToDateWhen {false}
+  }
+
+  tasks.register("safari", Test) {
+    systemProperties['selenide.browser'] = 'safari'
+    include 'integration/**/*'
+    exclude 'com/codeborne/selenide/**/*'
+    maxParallelForks = 1
+    outputs.upToDateWhen {false}
+  }
+
+  tasks.register("firefox_remote", Test) {
+    systemProperties['selenide.remote'] = 'http://localhost:4444/wd/hub'
+    systemProperties['selenide.browser'] = 'firefox'
+    include 'integration/**/*'
+    exclude 'com/codeborne/selenide/**/*'
+    outputs.upToDateWhen {false}
+  }
+
+  tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+    systemProperties['BUILD_URL'] = System.getenv()['BUILD_URL']
+    systemProperties['selenide.reportsFolder'] = "${reportsDir}/tests/${name}"
+    systemProperties['selenide.downloadsFolder'] = "${buildDir}/tests/downloads"
+
+    System.properties.stringPropertyNames()
+      .findAll { it.startsWith("selenide.") }
+      .forEach {
+        println " set ${it} to ${System.getProperty(it)}"
+        systemProperties[it] = System.getProperty(it)
+      }
+
+    if (System.getenv('CI')) {
+      maxParallelForks = 1
+    } else {
+      maxParallelForks = (int) Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+    }
+    jvmArgs = ['-ea', '-Xmx512m']
+    systemProperties['file.encoding'] = encoding
+    systemProperties['user.country'] = 'TR'
+    systemProperties['user.language'] = 'tr'
+  }
+}
+
+tasks.register("allTests") {
+  dependsOn tasks.named('clean'), tasks.named('check'), tasks.named('firefox_headless'), tasks.named('chrome_headless')
+}
